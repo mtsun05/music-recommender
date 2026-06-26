@@ -67,7 +67,7 @@ For local development, the provided defaults use Postgres and LocalStack from Do
 Start Postgres with pgvector and LocalStack SQS:
 
 ```bash
-docker compose up -d
+pnpm local:up
 ```
 
 The Postgres container applies `db/schema.sql` and `db/seed.sql` on first startup. For Supabase, run `db/schema.sql` in the SQL editor or apply `db/migrations/001_initial_schema.sql` through your migration flow.
@@ -80,25 +80,16 @@ http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/recommendation
 
 ## Run The App
 
-API:
+The clearest local run order is:
 
 ```bash
+pnpm local:up
 pnpm dev:api
-```
-
-Frontend:
-
-```bash
+pnpm dev:worker
 pnpm dev:web
 ```
 
-TypeScript worker:
-
-```bash
-pnpm dev:worker
-```
-
-All three:
+You can also start the API, frontend, and TypeScript worker together:
 
 ```bash
 pnpm dev
@@ -107,9 +98,21 @@ pnpm dev
 ## Useful Checks
 
 ```bash
+pnpm check
+```
+
+`pnpm check` runs:
+
+```bash
 pnpm typecheck
 pnpm lint
 pnpm format:check
+```
+
+Schema guidance:
+
+```bash
+pnpm db:schema
 ```
 
 ## Request Flow
@@ -120,6 +123,33 @@ pnpm format:check
 4. `POST /recommendation-requests` validates the payload, creates a queued `recommendation_requests` row, creates a durable `jobs` row, and sends an SQS message.
 5. The TypeScript worker polls SQS, marks the job/request running, inserts deterministic placeholder recommendations, marks both completed, and deletes the SQS message.
 6. The frontend polls `GET /recommendation-requests/:id` until completed.
+
+If the API creates the database rows but fails to enqueue the SQS message, it marks both the created `jobs` row and `recommendation_requests` row as `failed`, stores the safe error message `Failed to enqueue recommendation job.`, logs the raw enqueue error server-side with job/request IDs, and returns:
+
+```json
+{
+  "error": "Recommendation processing is temporarily unavailable.",
+  "code": "QUEUE_UNAVAILABLE",
+  "retryable": true
+}
+```
+
+with HTTP 503.
+
+## Manual Smoke Checks
+
+Queue failure:
+
+1. Stop LocalStack or set a bogus `SQS_RECOMMENDATION_QUEUE_URL`.
+2. Start the API and submit a recommendation request.
+3. Confirm `POST /recommendation-requests` returns HTTP 503 with `QUEUE_UNAVAILABLE`.
+4. Confirm the created recommendation request and job rows are marked `failed`.
+
+Shared schema smoke test:
+
+```bash
+pnpm --filter @music-recommender/shared test
+```
 
 ## Stubbed Future Work
 

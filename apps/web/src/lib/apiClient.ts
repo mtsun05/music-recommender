@@ -15,11 +15,33 @@ type RecentRequest = {
   createdAt: string;
 };
 
+type ApiErrorBody = {
+  error?: string;
+  code?: string;
+  retryable?: boolean;
+};
+
+export class ApiClientError extends Error {
+  code?: string;
+  retryable?: boolean;
+
+  constructor(message: string, options: { code?: string; retryable?: boolean } = {}) {
+    super(message);
+    this.name = "ApiClientError";
+    this.code = options.code;
+    this.retryable = options.retryable;
+  }
+}
+
 async function parseJsonResponse<T>(response: Response): Promise<T> {
-  const body = await response.json().catch(() => null);
+  const body = (await response.json().catch(() => null)) as ApiErrorBody | T | null;
 
   if (!response.ok) {
-    throw new Error(body?.error ?? `Request failed with ${response.status}`);
+    const errorBody = body as ApiErrorBody | null;
+    throw new ApiClientError(errorBody?.error ?? `Request failed with ${response.status}`, {
+      code: errorBody?.code,
+      retryable: errorBody?.retryable
+    });
   }
 
   return body as T;
