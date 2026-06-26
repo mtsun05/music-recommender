@@ -1,0 +1,26 @@
+{
+  "name": "music-recommender",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @music-recommender/api --filter @music-recommender/web --filter @music-recommender/ts-worker dev",
+    "dev:web": "pnpm --filter @music-recommender/web dev",
+    "dev:api": "pnpm --filter @music-recommender/api dev",
+    "dev:worker": "pnpm --filter @music-recommender/ts-worker dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.20.0"
+  }
+}

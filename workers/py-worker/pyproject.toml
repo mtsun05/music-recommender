@@ -1,0 +1,9 @@
+[project]
+name = "music-recommender-py-worker"
+version = "0.1.0"
+description = "Python scaffold for future embedding, vector search, ranking, and taste clustering work."
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
