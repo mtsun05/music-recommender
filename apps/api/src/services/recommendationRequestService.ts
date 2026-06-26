@@ -4,13 +4,16 @@ import {
   recommendationRequestCreateSchema,
   type RecommendationRequestCreateInput
 } from "@music-recommender/shared";
-import { createJob } from "../repositories/jobsRepo.js";
+import { createJob, markJobFailed } from "../repositories/jobsRepo.js";
 import {
   createRecommendationRequest,
   getRecommendationRequestForUser,
-  getRecommendationResultItems
+  getRecommendationResultItems,
+  markRecommendationRequestFailed
 } from "../repositories/recommendationRequestsRepo.js";
 import { enqueueRecommendationJob } from "./queueService.js";
+
+const enqueueFailureMessage = "Failed to enqueue recommendation job.";
 
 function splitInput(input: string) {
   try {
@@ -45,12 +48,31 @@ export async function createRecommendationRequestForUser(
     payload: { recommendationRequestId: request.id }
   });
 
-  await enqueueRecommendationJob({
-    jobType: JobType.GenerateRecommendations,
-    jobId: job.id,
-    recommendationRequestId: request.id,
-    userId
-  });
+  try {
+    await enqueueRecommendationJob({
+      jobType: JobType.GenerateRecommendations,
+      jobId: job.id,
+      recommendationRequestId: request.id,
+      userId
+    });
+  } catch (error) {
+    console.error("Failed to enqueue recommendation job", {
+      error,
+      jobId: job.id,
+      recommendationRequestId: request.id
+    });
+
+    await Promise.all([
+      markJobFailed(job.id, enqueueFailureMessage),
+      markRecommendationRequestFailed(request.id, enqueueFailureMessage)
+    ]);
+
+    throw Object.assign(new Error("Recommendation processing is temporarily unavailable."), {
+      statusCode: 503,
+      code: "QUEUE_UNAVAILABLE",
+      retryable: true
+    });
+  }
 
   return {
     requestId: request.id,

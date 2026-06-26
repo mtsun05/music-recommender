@@ -20,7 +20,7 @@ app.use("/spotify", spotifyRouter);
 
 app.use(
   (
-    err: Error & { statusCode?: number; issues?: unknown },
+    err: Error & { code?: string; issues?: unknown; retryable?: boolean; statusCode?: number },
     _req: express.Request,
     res: express.Response,
     _next: express.NextFunction
@@ -28,6 +28,8 @@ app.use(
     const statusCode = err.statusCode ?? (err.name === "ZodError" ? 400 : 500);
     res.status(statusCode).json({
       error: statusCode === 500 ? "Internal server error" : err.message,
+      code: err.code,
+      retryable: err.retryable,
       issues: err.issues
     });
   }

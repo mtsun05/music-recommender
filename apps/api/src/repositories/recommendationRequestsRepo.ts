@@ -90,6 +90,19 @@ export async function getRecommendationRequestForUser(requestId: string, userId:
   return result.rows[0] ?? null;
 }
 
+export async function markRecommendationRequestFailed(requestId: string, errorMessage: string) {
+  await query(
+    `
+      update recommendation_requests
+      set status = $2,
+          error_message = $3,
+          updated_at = now()
+      where id = $1
+    `,
+    [requestId, RecommendationRequestStatus.Failed, errorMessage]
+  );
+}
+
 export async function getRecommendationResultItems(requestId: string) {
   const result = await query<{
     rank: number;

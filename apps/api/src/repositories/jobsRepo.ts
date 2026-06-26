@@ -37,3 +37,17 @@ export async function createJob(input: {
 
   return row;
 }
+
+export async function markJobFailed(jobId: string, errorMessage: string) {
+  await query(
+    `
+      update jobs
+      set status = $2,
+          error_message = $3,
+          completed_at = now(),
+          updated_at = now()
+      where id = $1
+    `,
+    [jobId, JobStatus.Failed, errorMessage]
+  );
+}
