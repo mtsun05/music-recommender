@@ -10,9 +10,11 @@ const root = createRoot(document.getElementById("root")!);
 if (!publishableKey) {
   root.render(
     <StrictMode>
-      <div className="config-screen">
-        <h1>Music Recommender</h1>
-        <p>Set VITE_CLERK_PUBLISHABLE_KEY in apps/web/.env.local to enable auth.</p>
+      <div className="grid min-h-screen place-content-center px-8 text-center">
+        <h1 className="mb-4 text-4xl font-extrabold text-[#e5efe9]">Music Recommender</h1>
+        <p className="text-[#95ad9f]">
+          Set VITE_CLERK_PUBLISHABLE_KEY in apps/web/.env.local to enable auth.
+        </p>
       </div>
     </StrictMode>
   );

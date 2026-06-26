@@ -78,10 +78,12 @@ export function DashboardPage() {
 
   return (
     <Layout>
-      <section className="dashboard-grid">
-        <div className="dashboard-main">
-          <p className="eyebrow">Signed in as</p>
-          <h1>{appUserName ?? user?.primaryEmailAddress?.emailAddress ?? "Listener"}</h1>
+      <section className="mx-auto grid max-w-6xl gap-5 min-[821px]:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="rounded-lg border border-[#163520] bg-[#06120a]/75 p-4 min-[821px]:p-5">
+          <p className="mb-2.5 text-xs font-extrabold uppercase text-[#78d99e]">Signed in as</p>
+          <h1 className="mb-4 text-4xl font-extrabold leading-tight text-[#e5efe9] sm:text-5xl">
+            {appUserName ?? user?.primaryEmailAddress?.emailAddress ?? "Listener"}
+          </h1>
           <RecommendationForm
             isSubmitting={isSubmitting}
             onSubmit={async (values) => {
@@ -106,26 +108,27 @@ export function DashboardPage() {
               }
             }}
           />
-          {error ? <p className="error-text">{error}</p> : null}
+          {error ? <p className="text-[#fda4af]">{error}</p> : null}
           <RecommendationStatus request={activeRequest} />
         </div>
-        <aside className="recent-panel">
-          <h2>Recent requests</h2>
+        <aside className="rounded-lg border border-[#163520] bg-[#06120a]/75 p-4 min-[821px]:p-5">
+          <h2 className="mb-4 text-base font-bold">Recent requests</h2>
           {recentRequests.length === 0 ? (
-            <p className="muted">No requests queued yet.</p>
+            <p className="text-[#95ad9f]">No requests queued yet.</p>
           ) : (
-            <ul>
+            <ul className="grid list-none gap-2 p-0">
               {recentRequests.map((request) => (
                 <li key={request.id}>
                   <button
                     type="button"
+                    className="grid w-full cursor-pointer gap-1 rounded-lg border border-[#183a24] bg-[#09150d] p-3 text-left text-[#e5efe9]"
                     onClick={async () => {
                       const status = await api.getRecommendationRequest(request.id);
                       setActiveRequest(status);
                     }}
                   >
                     <span>{request.input}</span>
-                    <small>{request.status}</small>
+                    <small className="text-[#78d99e]">{request.status}</small>
                   </button>
                 </li>
               ))}
