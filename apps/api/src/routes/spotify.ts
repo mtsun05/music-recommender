@@ -1,3 +1,4 @@
+import type { SpotifyDisconnectResponse, SpotifyStatusResponse } from "@music-recommender/shared";
 import { Router } from "express";
 import { getCurrentUser } from "../auth/getCurrentUser.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
@@ -36,12 +37,14 @@ spotifyRouter.get(
   asyncHandler(async (req, res) => {
     const user = await getCurrentUser(req);
     const account = await getActiveSpotifyAccount(user.id);
-    res.json({
+    const response: SpotifyStatusResponse = {
       connected: Boolean(account),
       displayName: account?.displayName ?? null,
       scopes: account?.scopes ?? [],
       connectedAt: account?.connectedAt ?? null
-    });
+    };
+
+    res.json(response);
   })
 );
 
@@ -90,6 +93,7 @@ spotifyRouter.post(
   asyncHandler(async (req, res) => {
     const user = await getCurrentUser(req);
     await disconnectSpotifyAccounts(user.id);
-    res.json({ connected: false });
+    const response: SpotifyDisconnectResponse = { connected: false };
+    res.json(response);
   })
 );

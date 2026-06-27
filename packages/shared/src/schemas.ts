@@ -41,6 +41,17 @@ export const currentUserResponseSchema = z.object({
   displayName: z.string().nullable()
 });
 
+export const spotifyStatusResponseSchema = z.object({
+  connected: z.boolean(),
+  displayName: z.string().nullable(),
+  scopes: z.array(z.string()),
+  connectedAt: z.string().nullable()
+});
+
+export const spotifyDisconnectResponseSchema = z.object({
+  connected: z.literal(false)
+});
+
 export const recommendationJobMessageSchema = z.object({
   jobType: z.literal(JobType.GenerateRecommendations),
   jobId: z.string().uuid(),
@@ -57,4 +68,6 @@ export type RecommendationRequestStatusResponse = z.infer<
 >;
 export type RecommendationResultItem = z.infer<typeof recommendationResultItemSchema>;
 export type CurrentUserResponse = z.infer<typeof currentUserResponseSchema>;
+export type SpotifyStatusResponse = z.infer<typeof spotifyStatusResponseSchema>;
+export type SpotifyDisconnectResponse = z.infer<typeof spotifyDisconnectResponseSchema>;
 export type RecommendationJobMessage = z.infer<typeof recommendationJobMessageSchema>;

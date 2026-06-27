@@ -13,8 +13,7 @@ export const recommendationRequestsRouter = Router();
 recommendationRequestsRouter.get(
   "/",
   requireAuth,
-  asyncHandler(
-    async (req, res) => {
+  asyncHandler(async (req, res) => {
     const user = await getCurrentUser(req);
     const requests = await listRecommendationRequestsForUser(user.id);
     res.json({ requests });
@@ -24,8 +23,7 @@ recommendationRequestsRouter.get(
 recommendationRequestsRouter.post(
   "/",
   requireAuth,
-  asyncHandler(
-    async (req, res) => {
+  asyncHandler(async (req, res) => {
     const user = await getCurrentUser(req);
     const response = await createRecommendationRequestForUser(user.id, req.body);
     res.status(202).json(response);
@@ -35,8 +33,7 @@ recommendationRequestsRouter.post(
 recommendationRequestsRouter.get(
   "/:id",
   requireAuth,
-  asyncHandler(
-    async (req, res) => {
+  asyncHandler(async (req, res) => {
     const user = await getCurrentUser(req);
     const requestId = req.params.id;
     if (!requestId || Array.isArray(requestId)) {

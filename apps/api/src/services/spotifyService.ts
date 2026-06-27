@@ -1,9 +1,6 @@
 import { consumeSpotifyOAuthState } from "../repositories/spotifyOAuthStatesRepo.js";
 import { upsertSpotifyAccount } from "../repositories/spotifyAccountsRepo.js";
-import {
-  exchangeSpotifyCodeForToken,
-  getSpotifyCurrentUserProfile
-} from "../spotify/client.js";
+import { exchangeSpotifyCodeForToken, getSpotifyCurrentUserProfile } from "../spotify/client.js";
 import { encryptSpotifyToken } from "../spotify/tokenCrypto.js";
 
 function toScopes(scope: string) {
