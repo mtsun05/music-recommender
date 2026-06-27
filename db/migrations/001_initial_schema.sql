@@ -33,6 +33,17 @@ create table if not exists spotify_accounts (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists spotify_oauth_states (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid not null references users(id) on delete cascade,
+  state text unique not null,
+  code_verifier text,
+  redirect_after text,
+  expires_at timestamptz not null,
+  consumed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists artists (
   id uuid primary key default uuid_generate_v4(),
   name text not null,
@@ -202,6 +213,11 @@ create table if not exists artist_vectors (
 );
 
 create index if not exists spotify_accounts_user_id_idx on spotify_accounts(user_id);
+create unique index if not exists spotify_accounts_user_spotify_user_idx
+  on spotify_accounts(user_id, spotify_user_id)
+  where spotify_user_id is not null;
+create index if not exists spotify_oauth_states_state_idx on spotify_oauth_states(state);
+create index if not exists spotify_oauth_states_expires_at_idx on spotify_oauth_states(expires_at);
 create index if not exists albums_primary_artist_id_idx on albums(primary_artist_id);
 create index if not exists tracks_album_id_idx on tracks(album_id);
 create index if not exists tracks_primary_artist_id_idx on tracks(primary_artist_id);

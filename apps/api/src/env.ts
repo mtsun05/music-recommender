@@ -10,7 +10,11 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   AWS_REGION: z.string().default("us-east-1"),
   AWS_ENDPOINT_URL: z.string().url().optional(),
-  SQS_RECOMMENDATION_QUEUE_URL: z.string().url()
+  SQS_RECOMMENDATION_QUEUE_URL: z.string().url(),
+  SPOTIFY_CLIENT_ID: z.string().optional(),
+  SPOTIFY_CLIENT_SECRET: z.string().optional(),
+  SPOTIFY_REDIRECT_URI: z.string().url().default("http://localhost:4000/spotify/callback"),
+  SPOTIFY_TOKEN_ENCRYPTION_KEY: z.string().optional()
 });
 
 export const env = envSchema.parse(process.env);
