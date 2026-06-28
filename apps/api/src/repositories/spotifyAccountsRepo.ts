@@ -131,6 +131,67 @@ export async function upsertSpotifyAccount(input: {
   return toSpotifyAccount(row);
 }
 
+export async function updateSpotifyAccountTokens(input: {
+  accountId: string;
+  accessTokenEncrypted: string;
+  refreshTokenEncrypted?: string | null;
+  tokenExpiresAt: Date;
+}) {
+  const shouldUpdateRefreshToken = Object.prototype.hasOwnProperty.call(
+    input,
+    "refreshTokenEncrypted"
+  );
+  const result = await query<SpotifyAccountRow>(
+    `
+      update spotify_accounts
+      set access_token_encrypted = $2,
+          refresh_token_encrypted = case when $5 then $3 else refresh_token_encrypted end,
+          token_expires_at = $4,
+          updated_at = now()
+      where id = $1 and disconnected_at is null
+      returning
+        id,
+        user_id,
+        spotify_user_id,
+        display_name,
+        access_token_encrypted,
+        refresh_token_encrypted,
+        token_expires_at,
+        scopes,
+        connected_at,
+        disconnected_at
+    `,
+    [
+      input.accountId,
+      input.accessTokenEncrypted,
+      input.refreshTokenEncrypted ?? null,
+      input.tokenExpiresAt,
+      shouldUpdateRefreshToken
+    ]
+  );
+
+  const row = result.rows[0];
+  if (!row) {
+    throw new Error("Failed to update Spotify account tokens");
+  }
+
+  return toSpotifyAccount(row);
+}
+
+export async function disconnectSpotifyAccount(accountId: string, options = { clearTokens: true }) {
+  await query(
+    `
+      update spotify_accounts
+      set disconnected_at = now(),
+          access_token_encrypted = case when $2 then null else access_token_encrypted end,
+          refresh_token_encrypted = case when $2 then null else refresh_token_encrypted end,
+          updated_at = now()
+      where id = $1 and disconnected_at is null
+    `,
+    [accountId, options.clearTokens]
+  );
+}
+
 export async function disconnectSpotifyAccounts(userId: string, options = { clearTokens: true }) {
   await query(
     `
